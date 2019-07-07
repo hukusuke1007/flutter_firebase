@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase/pages/memo_page.dart';
+import 'package:flutter_firebase/model/ballcap/ballcap_app.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  BallcapApp.configure(Firestore.instance.document('version/1'));
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

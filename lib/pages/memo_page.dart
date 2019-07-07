@@ -20,6 +20,7 @@ class MemoPage extends StatefulWidget {
   _MemoPageState createState() => _MemoPageState();
 }
 
+
 class _MemoPageState extends State<MemoPage> {
   int _counter = 0;
 
@@ -28,15 +29,17 @@ class _MemoPageState extends State<MemoPage> {
   void _incrementCounter() async {
     /// save
     final memo = Memo();
-    memo.text = 'memomemo';
-    await memo.save();
-
-    /// get
-    final items = await Firestore.instance.collection('test/1/memo').getDocuments();
-    items.documents.forEach((item) async {
-      final memo = await Memo.get(snapshot: item);
-      print('${memo.id} ${memo.createdAt?.toDate()}');
-    });
+    print(memo);
+    
+//    memo.text = 'memomemo';
+//    await memo.save();
+//
+//    /// get
+//    final items = await Firestore.instance.collection('test/1/memo').getDocuments();
+//    items.documents.forEach((item) async {
+//      final memo = await Memo.get(snapshot: item);
+//      print('${memo.id} ${memo.createdAt?.toDate()}');
+//    });
   }
 
   void _load() async {

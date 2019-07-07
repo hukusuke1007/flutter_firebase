@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_firebase/model/ballcap/ballcap_app.dart';
 
 class Memo {
-  Memo({this.id});
+  Memo({this.id}) {
+    print(BallcapApp.instance.rootReference.path);
+  }
 
   String id;
   String uid;
@@ -10,6 +13,7 @@ class Memo {
   Timestamp createdAt;
 
   Map<String, dynamic> data;
+
 
   static Memo from(String id, Map<String, dynamic> map) {
     final item = Memo();
