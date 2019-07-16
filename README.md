@@ -1,16 +1,17 @@
 # flutter_firebase
 
-A new Flutter application.
+Flutter + Firebase Application.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+```sh
+git clone https://github.com/hukusuke1007/flutter_firebase.git
+```
 
-A few resources to get you started if this is your first Flutter project:
+Set Google info plist in project. Please see following documents.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+[https://firebase.google.com/docs/flutter/setup?#configure_an_ios_app](https://firebase.google.com/docs/flutter/setup?#configure_an_ios_app)<br>
+-> No. 3
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+[https://firebase.google.com/docs/flutter/setup?#configure_an_android_app](https://firebase.google.com/docs/flutter/setup?#configure_an_android_app)<br>
+-> No. 3
