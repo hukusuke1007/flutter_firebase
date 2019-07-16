@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: UsersPage(title: 'Flutter Demo Home Page'),
+      home: UsersPage(title: 'Flutter Firebase Demo'),
     );
   }
 }

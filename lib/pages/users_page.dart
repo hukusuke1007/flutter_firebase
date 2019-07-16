@@ -12,13 +12,19 @@ class UsersPage extends StatefulWidget {
   _UsersPageState createState() => _UsersPageState();
 }
 
-
 class _UsersPageState extends State<UsersPage> {
 
+  List<User> _dataSource = [];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(afterBuild);
+  }
+
+  void afterBuild(Duration duration) async {
+    await _onLoad();
+    await _onListener();
   }
 
   @override
@@ -36,28 +42,21 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   Widget _dataBody() {
-    return FutureBuilder<List<User>>(
-      future: _onLoad(),
-      builder: (context, snapshot) {
-        print('project_users ${snapshot.hasData} ${snapshot.data}');
-        if (snapshot.hasData == false) {
-          print('project_snapshot data is: ${snapshot.data}');
+    return ListView.builder(
+      itemCount: _dataSource.length,
+      itemBuilder: (context, index) {
+        if (_dataSource.isEmpty) {
           return Container();
         }
-        return ListView.builder(
-          itemCount: snapshot.data.length,
-          itemBuilder: (context, index) {
-            final item = snapshot.data[index];
-            return Dismissible(
-              key: Key(item.id),
-              onDismissed: (direction) {
-                _onRemove(item.id);
-                Scaffold.of(context).showSnackBar(SnackBar(content: Text("${item.id} removed.")));
-              },
-              background: Container(color: Colors.red),
-              child: _buildRow(index, item),
-            );
+        final item = _dataSource[index];
+        return Dismissible(
+          key: Key(item.id),
+          onDismissed: (direction) {
+            _onRemove(item);
+            Scaffold.of(context).showSnackBar(SnackBar(content: Text("${item.id} removed.")));
           },
+          background: Container(color: Colors.red),
+          child: _buildRow(index, item),
         );
       },
     );
@@ -129,33 +128,63 @@ class _UsersPageState extends State<UsersPage> {
     }
   }
 
-  Future<List<User>> _onLoad() async {
+  Future _onLoad() async {
     try {
-      final collection = await Firestore.instance.collection('version/1/${User.path}').orderBy('createdAt', descending: true).getDocuments();
+      final collection = await Firestore.instance.collection('version/1/${User.path}')
+          .orderBy('createdAt', descending: true).getDocuments();
       final result = collection.documents.map((item) => User.from(item.documentID, item.data));
-      return result.toList();
+      setState(() {
+        _dataSource = result.toList();
+      });
     } catch (error) {
       throw error;
     }
   }
 
-  Future _onRemove(String id) async {
+  Future _onRemove(User item) async {
     try {
-      final document = Firestore.instance.document('version/1/${User.path}/$id');
+      if (_dataSource.contains(item)) {
+        setState(() {
+          _dataSource.remove(item);
+        });
+      }
+      final document = Firestore.instance.document('version/1/${User.path}/${item.id}');
       await document.delete();
     } catch (error) {
       throw error;
     }
   }
 
-  Future<List<User>> _onListener() async {
+  Future _onListener() async {
     final collection = Firestore.instance.collection('version/1/${User.path}');
     collection.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        print("change ${change.type} ${change.document.data}");
+        final changeItem = User.from(change.document.documentID, change.document.data);
+        final isExistItem = _dataSource.where((item) => item.id == changeItem.id).isNotEmpty;
+        /// add
+        if (change.type == DocumentChangeType.added) {
+          if (!isExistItem) {
+            setState(() {
+              _dataSource.insert(0, changeItem);
+            });
+          }
+        }
+        if (isExistItem) {
+          /// modified
+          if (change.type == DocumentChangeType.modified) {
+            setState(() {
+              final temp = _dataSource.map((item) => item.id == changeItem.id ? changeItem : item).toList();
+              _dataSource.replaceRange(0, _dataSource.length, temp);
+            });
+          }
+          /// removed
+          if (change.type == DocumentChangeType.removed) {
+            setState(() {
+              _dataSource.removeWhere((item) => item.id == changeItem.id);
+            });
+          }
+        }
       });
     });
-
   }
-
 }
