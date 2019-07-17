@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase/model/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_firebase/utils/date_util.dart';
+import 'package:flutter_firebase/pages/user_profile_page.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class UsersPage extends StatefulWidget {
   UsersPage({Key key, this.title}) : super(key: key);
@@ -67,6 +69,8 @@ class _UsersPageState extends State<UsersPage> {
     return GestureDetector(
       onTap: () {
         print(item.id);
+        Navigator.push<void>(context, MaterialPageRoute(
+            builder: (BuildContext context) => UserProfilePage(item)));
       },
       child: Container(
         alignment: Alignment.center,
@@ -150,6 +154,13 @@ class _UsersPageState extends State<UsersPage> {
       }
       final document = Firestore.instance.document('version/1/${User.path}/${item.id}');
       await document.delete();
+
+      /// storage delete
+      if (item.image != null) {
+        final path = 'version/1/${item.id}/image/${item.image.name}';
+        final storageRef = FirebaseStorage.instance.ref().child(path);
+        await storageRef.delete();
+      }
     } catch (error) {
       throw error;
     }
