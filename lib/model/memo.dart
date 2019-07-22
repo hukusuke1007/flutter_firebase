@@ -1,26 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_firebase/model/storage_file.dart';
 
-class User {
+class Memo {
 
-  User({this.id, this.name, this.image, this.createdAt, this.updateAt});
+  Memo({this.id, this.text, this.image, this.createdAt, this.updateAt});
 
-  static String path = "user";
+  static String path = "memo";
 
   String id;
-  String name;
+  String text;
   StorageFile image;
   Timestamp createdAt;
   Timestamp updateAt;
 
-  static User from(String id, Map<String, dynamic> map) {
-    final item = User();
+  static Memo from(String id, Map<String, dynamic> map) {
+    final item = Memo();
 
-    /// user id, name
+    /// id, text
     item.id = map.containsKey('id') ? map['id'] as String : null;
-    item.name = map.containsKey('name') ? map['name'] as String : null;
+    item.text = map.containsKey('text') ? map['text'] as String : null;
 
-    /// user image
+    /// image
     if (map.containsKey('image')) {
       final image = map['image'] as Map<dynamic, dynamic>;
       if (image != null) {
@@ -37,7 +37,7 @@ class User {
   Map<String, dynamic> toJson() {
     final map = Map<String, dynamic>();
     if (id != null) map['id'] = id;
-    if (name != null) map['name'] = name;
+    if (text != null) map['text'] = text;
     if (image != null) map['image'] = image.toJson();
     if (createdAt != null) map['createdAt'] = createdAt;
     if (updateAt != null) map['updateAt'] = updateAt;

@@ -3,20 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_firebase/model/user.dart';
+import 'package:flutter_firebase/model/memo.dart';
 import 'package:flutter_firebase/model/storage_file.dart';
 
-class UserProfilePage extends StatefulWidget {
+class MemoEditPage extends StatefulWidget {
 
-  UserProfilePage(this.user);
+  MemoEditPage(this.memo);
 
-  final User user;
+  final Memo memo;
 
   @override
-  _UserProfilePageState createState() => _UserProfilePageState();
+  _MemoEditPageState createState() => _MemoEditPageState();
 }
 
-class _UserProfilePageState extends State<UserProfilePage> {
+class _MemoEditPageState extends State<MemoEditPage> {
 
   bool _isLoading = false;
 
@@ -24,7 +24,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.user.name),
+        title: Text(widget.memo.text),
       ),
       body: _dataBody(),
     );
@@ -39,7 +39,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         children: <Widget>[
           Container(
             transform: Matrix4.translationValues(0, -20, 0),
-            child: (widget.user.image == null && _isLoading == false)
+            child: (widget.memo.image == null && _isLoading == false)
               ? Text("no image") : _isLoading == true
               ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Colors.lightBlue),)
                 : CircleAvatar(
@@ -47,7 +47,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                     backgroundColor: Colors.transparent,
                     child: ClipOval(
                       child: CachedNetworkImage(
-                        imageUrl: widget.user.image.url,
+                        imageUrl: widget.memo.image.url,
                         height: 200,
                         width: 200,
                         fit: BoxFit.fill,
@@ -72,7 +72,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   color: Colors.white,
                 ),),
                 color: _isLoading != true ? Colors.blueGrey : Colors.white70,
-                onPressed: () => _isLoading != true ? _onRemoveImage(widget.user) : null
+                onPressed: () => _isLoading != true ? _onRemoveImage(widget.memo) : null
             ),
           )
         ],
@@ -94,7 +94,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     /// upload storage
     final filename = 'filename';
     final mimeType = 'image/png';
-    final path = 'version/1/${widget.user.id}/image/$filename';
+    final path = 'version/1/${Memo.path}/${widget.memo.id}/image/$filename';
     final storageRef = FirebaseStorage.instance.ref().child(path);
     final uploadTask = storageRef.putFile(image, StorageMetadata(contentType: mimeType));
     uploadTask.events.listen((event) {
@@ -106,18 +106,18 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final downloadUrl = await uploadTask.onComplete;
     final imageUrl = await downloadUrl.ref.getDownloadURL();
     print('imageUrl $imageUrl');
-    widget.user.image = StorageFile(filename, imageUrl, mimeType);
-    await _onUpdate(widget.user);
+    widget.memo.image = StorageFile(filename, imageUrl, mimeType);
+    await _onUpdate(widget.memo);
 
     setState(() {
       _isLoading = false;
     });
   }
 
-  Future _onUpdate(User item) async {
+  Future _onUpdate(Memo item) async {
     try {
       final id = item.id;
-      final document = Firestore.instance.document('version/1/${User.path}/$id');
+      final document = Firestore.instance.document('version/1/${Memo.path}/$id');
       final date = Timestamp.now();
       item.updateAt = date;
       await document.updateData(item.toJson());
@@ -126,7 +126,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  Future _onRemoveImage(User item) async {
+  Future _onRemoveImage(Memo item) async {
     try {
       if (item.image == null) return;
 
@@ -137,7 +137,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       final imageName = item.image.name;
 
       final id = item.id;
-      final document = Firestore.instance.document('version/1/${User.path}/$id');
+      final document = Firestore.instance.document('version/1/${Memo.path}/$id');
       await document.updateData(item.removeImageToJson());
 
       /// storage delete

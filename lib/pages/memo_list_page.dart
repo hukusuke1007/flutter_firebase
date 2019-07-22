@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase/model/user.dart';
+import 'package:flutter_firebase/model/memo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_firebase/utils/date_util.dart';
-import 'package:flutter_firebase/pages/user_profile_page.dart';
+import 'package:flutter_firebase/pages/memo_edit_page.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class UsersPage extends StatefulWidget {
-  UsersPage({Key key, this.title}) : super(key: key);
+class MemoListPage extends StatefulWidget {
+  MemoListPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _UsersPageState createState() => _UsersPageState();
+  _MemoListPageState createState() => _MemoListPageState();
 }
 
-class _UsersPageState extends State<UsersPage> {
+class _MemoListPageState extends State<MemoListPage> {
 
-  List<User> _dataSource = [];
+  List<Memo> _dataSource = [];
 
   @override
   void initState() {
@@ -64,13 +64,13 @@ class _UsersPageState extends State<UsersPage> {
     );
   }
   
-  Widget _buildRow(int index, User item) {
+  Widget _buildRow(int index, Memo item) {
     final createdDate = DateUtil.dateToString(item.createdAt.toDate(), 'yyyy.MM.dd HH:mm:ss');
     return GestureDetector(
       onTap: () {
         print(item.id);
         Navigator.push<void>(context, MaterialPageRoute(
-            builder: (BuildContext context) => UserProfilePage(item)));
+            builder: (BuildContext context) => MemoEditPage(item)));
       },
       child: Container(
         alignment: Alignment.center,
@@ -108,7 +108,7 @@ class _UsersPageState extends State<UsersPage> {
                 ),
                 Container(
                   margin: const EdgeInsets.only(top: 8, bottom: 14),
-                  child: Text(item.name, textAlign: TextAlign.right, style: TextStyle(
+                  child: Text(item.text, textAlign: TextAlign.right, style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 20,
                   ),),
@@ -122,10 +122,10 @@ class _UsersPageState extends State<UsersPage> {
 
   Future _onAdd() async {
     try {
-      final collection = Firestore.instance.collection('version/1/${User.path}');
+      final collection = Firestore.instance.collection('version/1/${Memo.path}');
       final id = collection.document().documentID;
       final date = Timestamp.now();
-      final item = User(id: id, name: '$id san', createdAt: date, updateAt: date);
+      final item = Memo(id: id, text: 'memo$id', createdAt: date, updateAt: date);
       await collection.document(id).setData(item.toJson(), merge: true);
     } catch (error) {
       throw error;
@@ -134,9 +134,9 @@ class _UsersPageState extends State<UsersPage> {
 
   Future _onLoad() async {
     try {
-      final collection = await Firestore.instance.collection('version/1/${User.path}')
+      final collection = await Firestore.instance.collection('version/1/${Memo.path}')
           .orderBy('createdAt', descending: true).getDocuments();
-      final result = collection.documents.map((item) => User.from(item.documentID, item.data));
+      final result = collection.documents.map((item) => Memo.from(item.documentID, item.data));
       setState(() {
         _dataSource = result.toList();
       });
@@ -145,14 +145,14 @@ class _UsersPageState extends State<UsersPage> {
     }
   }
 
-  Future _onRemove(User item) async {
+  Future _onRemove(Memo item) async {
     try {
       if (_dataSource.contains(item)) {
         setState(() {
           _dataSource.remove(item);
         });
       }
-      final document = Firestore.instance.document('version/1/${User.path}/${item.id}');
+      final document = Firestore.instance.document('version/1/${Memo.path}/${item.id}');
       await document.delete();
 
       /// storage delete
@@ -167,10 +167,10 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   Future _onListener() async {
-    final collection = Firestore.instance.collection('version/1/${User.path}');
+    final collection = Firestore.instance.collection('version/1/${Memo.path}');
     collection.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        final changeItem = User.from(change.document.documentID, change.document.data);
+        final changeItem = Memo.from(change.document.documentID, change.document.data);
         final isExistItem = _dataSource.where((item) => item.id == changeItem.id).isNotEmpty;
         /// add
         if (change.type == DocumentChangeType.added) {
