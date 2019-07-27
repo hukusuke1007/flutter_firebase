@@ -157,7 +157,7 @@ class _MemoListPageState extends State<MemoListPage> {
 
       /// storage delete
       if (item.image != null) {
-        final path = 'version/1/${item.id}/image/${item.image.name}';
+        final path = 'version/1/${Memo.path}/${item.id}/image/${item.image.name}';
         final storageRef = FirebaseStorage.instance.ref().child(path);
         await storageRef.delete();
       }
