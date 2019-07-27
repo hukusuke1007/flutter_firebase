@@ -141,7 +141,7 @@ class _MemoEditPageState extends State<MemoEditPage> {
       await document.updateData(item.removeImageToJson());
 
       /// storage delete
-      final path = 'version/1/${item.id}/image/$imageName';
+      final path = 'version/1/${Memo.path}/${item.id}/image/$imageName';
       final storageRef = FirebaseStorage.instance.ref().child(path);
       await storageRef.delete();
       setState(() {
