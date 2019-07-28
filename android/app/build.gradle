@@ -70,6 +70,7 @@ dependencies {
 
     // https://qiita.com/hiko1129/items/6ab82a94afa02e49a9ee
     implementation 'com.android.support:multidex:1.0.3'
+
 }
 
 apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle plugin
